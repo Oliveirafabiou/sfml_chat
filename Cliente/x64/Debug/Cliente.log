@@ -1,0 +1,5 @@
+﻿  Cliente.cpp
+C:\Projects\Network class\Client\sfml_chat\Cliente.cpp(20,16): warning C4834: discarding return value of function with [[nodiscard]] attribute
+  mainCliente.cpp
+  Generating Code...
+  Cliente.vcxproj -> C:\Users\fabio\Desktop\Network\SFML Truco\x64\Debug\Cliente.exe

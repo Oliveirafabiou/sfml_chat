@@ -1,0 +1,15 @@
+﻿  Baralho.cpp
+C:\Projects\Network class\Client\sfml_chat\Baralho.cpp(19,75): warning C4244: 'argument': conversion from '_Rep' to 'unsigned int', possible loss of data
+C:\Projects\Network class\Client\sfml_chat\Baralho.cpp(19,75): warning C4244:         with
+C:\Projects\Network class\Client\sfml_chat\Baralho.cpp(19,75): warning C4244:         [
+C:\Projects\Network class\Client\sfml_chat\Baralho.cpp(19,75): warning C4244:             _Rep=std::chrono::system_clock::rep
+C:\Projects\Network class\Client\sfml_chat\Baralho.cpp(19,75): warning C4244:         ]
+  Carta.cpp
+  Jogador.cpp
+  mainServidor.cpp
+  Partida.cpp
+  Servidor.cpp
+C:\Projects\Network class\Client\sfml_chat\Servidor.cpp(57,16): warning C4834: discarding return value of function with [[nodiscard]] attribute
+C:\Projects\Network class\Client\sfml_chat\Servidor.cpp(71,30): warning C4834: discarding return value of function with [[nodiscard]] attribute
+  Generating Code...
+  Servidor.vcxproj -> C:\Users\fabio\Desktop\Network\SFML Truco\x64\Debug\Servidor.exe
