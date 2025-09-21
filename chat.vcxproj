@@ -139,7 +139,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="chat.cpp" />
+    <ClCompile Include="Baralho.cpp" />
+    <ClCompile Include="Carta.cpp" />
+    <ClCompile Include="Cliente.cpp" />
+    <ClCompile Include="Jogador.cpp" />
+    <ClCompile Include="mainCliente.cpp" />
+    <ClCompile Include="mainServidor.cpp" />
+    <ClCompile Include="Partida.cpp" />
+    <ClCompile Include="Servidor.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Baralho.hpp" />
+    <ClInclude Include="Carta.hpp" />
+    <ClInclude Include="Cliente.hpp" />
+    <ClInclude Include="Jogador.hpp" />
+    <ClInclude Include="Partida.hpp" />
+    <ClInclude Include="Servidor.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

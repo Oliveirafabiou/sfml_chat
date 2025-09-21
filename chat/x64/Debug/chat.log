@@ -1,3 +1,0 @@
-﻿  server.cpp
-C:\Programas\sfml_chat\server.cpp(28,20): warning C4834: descartando o valor retornado da função com o atributo [[nodiscard]]
-  chat.vcxproj -> C:\Programas\sfml_chat\x64\Debug\chat.exe

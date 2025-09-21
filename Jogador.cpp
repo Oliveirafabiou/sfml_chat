@@ -8,8 +8,10 @@ void Jogador::receberCarta(const Carta& c) {
 }
 
 Carta Jogador::jogarCarta(int indice) {
-    if (indice < 0 || indice >= (int)mao.size())
-        throw std::out_of_range("Carta inválida!");
+    if (indice < 0 || indice >= (int)mao.size()) {
+		//throw std::out_of_range("Carta inválida!"); joga um erro caso a carta seja inválida ou nesse caso, joga a carta de índice zero:
+		indice = 0;
+    }
     Carta escolhida = mao[indice];
     mao.erase(mao.begin() + indice);
     return escolhida;

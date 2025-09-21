@@ -1,44 +1,59 @@
-# Prerequisites
+# Arquivos de build e pastas do Visual Studio
+*.vs/
+[Dd]ebug/
+[Rr]elease/
+x64/
+Win32/
+ipch/
+
+# Arquivos gerados pelo usuário e pelo projeto
+*.vcxproj.user
+*.suo
+*.user
+
+# Pré-requisitos
 *.d
 
-# Compiled Object files
+# Arquivos de objeto compilados
 *.slo
 *.lo
 *.o
 *.obj
 
-# Precompiled Headers
+# Cabeçalhos pré-compilados
 *.gch
 *.pch
 
-# Linker files
+# Arquivos de linker
 *.ilk
 
-# Debugger Files
+# Arquivos de depuração
 *.pdb
+*.idb
+*.dwo
 
-# Compiled Dynamic libraries
+# Bibliotecas dinâmicas compiladas
 *.so
 *.dylib
 *.dll
 
-# Fortran module files
+# Arquivos de módulo Fortran
 *.mod
 *.smod
 
-# Compiled Static libraries
+# Bibliotecas estáticas compiladas
 *.lai
 *.la
 *.a
 *.lib
 
-# Executables
+# Executáveis
 *.exe
 *.out
 *.app
 
-# debug information files
-*.dwo
-
-# Visual Studio Folders
-*.vs
+# Arquivos de log e temporários de build
+*.log
+*.tlog
+*.recipe
+*.lastbuildstate

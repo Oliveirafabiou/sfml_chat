@@ -3,7 +3,7 @@
 
 int main() {
     Cliente cliente("JogadorX");
-    if (!cliente.conectar("127.0.0.1", 54000)) return 1;
+    if (!cliente.conectar("192.168.100.26", 54000)) return 1;
 
     while (true) {
         std::string entrada;
