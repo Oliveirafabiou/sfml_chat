@@ -15,39 +15,39 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\..\Projects\Network class\Client\sfml_chat\Baralho.cpp">
+    <ClCompile Include="..\Arquivos\Baralho.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\Projects\Network class\Client\sfml_chat\Carta.cpp">
+    <ClCompile Include="..\Arquivos\Carta.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\Projects\Network class\Client\sfml_chat\Jogador.cpp">
+    <ClCompile Include="..\Arquivos\Jogador.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\Projects\Network class\Client\sfml_chat\mainServidor.cpp">
+    <ClCompile Include="..\Arquivos\mainServidor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\Projects\Network class\Client\sfml_chat\Partida.cpp">
+    <ClCompile Include="..\Arquivos\Partida.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\Projects\Network class\Client\sfml_chat\Servidor.cpp">
+    <ClCompile Include="..\Arquivos\Servidor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\..\Projects\Network class\Client\sfml_chat\Baralho.hpp">
+    <ClInclude Include="..\Arquivos\Baralho.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\Projects\Network class\Client\sfml_chat\Carta.hpp">
+    <ClInclude Include="..\Arquivos\Carta.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\Projects\Network class\Client\sfml_chat\Jogador.hpp">
+    <ClInclude Include="..\Arquivos\Jogador.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\Projects\Network class\Client\sfml_chat\Partida.hpp">
+    <ClInclude Include="..\Arquivos\Partida.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\Projects\Network class\Client\sfml_chat\Servidor.hpp">
+    <ClInclude Include="..\Arquivos\Servidor.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

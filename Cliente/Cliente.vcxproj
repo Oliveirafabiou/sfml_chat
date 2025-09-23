@@ -19,11 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\..\Projects\Network class\Client\sfml_chat\Cliente.cpp" />
-    <ClCompile Include="..\..\..\..\..\..\Projects\Network class\Client\sfml_chat\mainCliente.cpp" />
+    <ClInclude Include="..\Arquivos\Cliente.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\..\Projects\Network class\Client\sfml_chat\Cliente.hpp" />
+    <ClCompile Include="..\Arquivos\Cliente.cpp" />
+    <ClCompile Include="..\Arquivos\mainCliente.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

@@ -1,5 +1,4 @@
 #include "Jogador.hpp"
-#include <stdexcept>
 
 Jogador::Jogador(int id, std::string nome) : id(id), nome(nome) {}
 
