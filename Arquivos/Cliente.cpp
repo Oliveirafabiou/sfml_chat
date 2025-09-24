@@ -5,11 +5,17 @@ Cliente::Cliente(std::string nome) : nome(nome) {}
 
 bool Cliente::conectar(const std::string& ip, unsigned short porta) {
     auto resolvedAddress = sf::IpAddress::resolve(ip);
+<<<<<<< HEAD:Cliente.cpp
+=======
+	std::cout << "Tentando conectar ao servidor " << ip << ":" << porta << "...\n";
+>>>>>>> truco/debug:Arquivos/Cliente.cpp
 
     if (socket.connect(*resolvedAddress, porta) != sf::Socket::Status::Done) {
         std::cerr << "Erro ao conectar ao servidor!\n";
         return false;
     }
+
+    socket.setBlocking(false);
     std::cout << "Conectado ao servidor!\n";
     return true;
 }
@@ -25,6 +31,6 @@ void Cliente::ouvir() {
     if (socket.receive(packet) == sf::Socket::Status::Done) {
         std::string msg;
         packet >> msg;
-        std::cout << "[Servidor]: " << msg << "\n";
+        std::cout << "\n[Servidor]: " << msg << std::endl;
     }
 }

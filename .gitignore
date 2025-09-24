@@ -1,10 +1,15 @@
+<<<<<<< HEAD
 # Arquivos de build e pastas do Visual Studio
+=======
+# Pastas de build e do Visual Studio
+>>>>>>> truco/debug
 *.vs/
 [Dd]ebug/
 [Rr]elease/
 x64/
 Win32/
 ipch/
+<<<<<<< HEAD
 
 # Arquivos gerados pelo usuário e pelo projeto
 *.vcxproj.user
@@ -14,6 +19,20 @@ ipch/
 # Pré-requisitos
 *.d
 
+=======
+
+# Arquivos gerados pelo usuário e pelo projeto
+*.vcxproj.user
+*.suo
+*.user
+
+# Arquivos de log e temporários de build
+*.log
+*.tlog
+*.recipe
+*.lastbuildstate
+
+>>>>>>> truco/debug
 # Arquivos de objeto compilados
 *.slo
 *.lo
@@ -37,10 +56,13 @@ ipch/
 *.dylib
 *.dll
 
+<<<<<<< HEAD
 # Arquivos de módulo Fortran
 *.mod
 *.smod
 
+=======
+>>>>>>> truco/debug
 # Bibliotecas estáticas compiladas
 *.lai
 *.la
@@ -50,6 +72,7 @@ ipch/
 # Executáveis
 *.exe
 *.out
+<<<<<<< HEAD
 *.app
 
 # Arquivos de log e temporários de build
@@ -57,3 +80,6 @@ ipch/
 *.tlog
 *.recipe
 *.lastbuildstate
+=======
+*.app
+>>>>>>> truco/debug

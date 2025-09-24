@@ -1,5 +1,4 @@
 #include "Jogador.hpp"
-#include <stdexcept>
 
 Jogador::Jogador(int id, std::string nome) : id(id), nome(nome) {}
 
@@ -9,7 +8,10 @@ void Jogador::receberCarta(const Carta& c) {
 
 Carta Jogador::jogarCarta(int indice) {
     if (indice < 0 || indice >= (int)mao.size()) {
+<<<<<<< HEAD:Jogador.cpp
 		//throw std::out_of_range("Carta inválida!"); joga um erro caso a carta seja inválida ou nesse caso, joga a carta de índice zero:
+=======
+>>>>>>> truco/debug:Arquivos/Jogador.cpp
 		indice = 0;
     }
     Carta escolhida = mao[indice];
@@ -27,3 +29,11 @@ std::string Jogador::maoToString() const {
 
 std::string Jogador::getNome() const { return nome; }
 int Jogador::getId() const { return id; }
+
+
+const std::vector<Carta>& Jogador::getMao() const {
+    return mao;
+}
+void Jogador::limparMao() {
+    mao.clear();
+}

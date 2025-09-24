@@ -15,6 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+<<<<<<< HEAD:chat.vcxproj.filters
     <ClCompile Include="Carta.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -37,10 +38,17 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="mainCliente.cpp">
+=======
+    <ClCompile Include="..\Arquivos\Cliente.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Arquivos\mainCliente.cpp">
+>>>>>>> truco/debug:Cliente_2/Cliente_2.vcxproj.filters
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+<<<<<<< HEAD:chat.vcxproj.filters
     <ClInclude Include="Carta.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -57,6 +65,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Cliente.hpp">
+=======
+    <ClInclude Include="..\Arquivos\Carta.hpp">
+>>>>>>> truco/debug:Cliente_2/Cliente_2.vcxproj.filters
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
