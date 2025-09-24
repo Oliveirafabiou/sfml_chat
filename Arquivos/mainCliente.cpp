@@ -24,27 +24,14 @@ int main() {
     std::thread threadOuvinte(escutarServidor, std::ref(cliente));
     threadOuvinte.detach();
 
-    while (true) {
-        std::string escolha;
-        std::getline(std::cin, escolha);
+    std::cout << "Conectado! Aguardando o inicio do jogo..." << std::endl;
 
-        if (escolha == "1") {
-            std::cout << "Digite o indice da carta: ";
-            std::string indice;
-            std::getline(std::cin, indice);
-            cliente.enviar("JOGAR " + indice);
-        }
-        else if (escolha == "2") {
-            cliente.enviar("TRUCO");
-        }
-        else if (escolha == "3") {
-            std::cout << "Digite sua mensagem: ";
-            std::string chat;
-            std::getline(std::cin, chat);
-            cliente.enviar("MSG " + chat);
-        }
-        else {
-			std::cout << "Opcao invalida. Tente novamente.\n";
+    while (true) {
+        std::string entrada;
+        std::getline(std::cin, entrada);
+
+        if (!entrada.empty()) {
+            cliente.enviar(entrada);
         }
     }
 

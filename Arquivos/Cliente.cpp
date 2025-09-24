@@ -28,6 +28,6 @@ void Cliente::ouvir() {
     if (socket.receive(packet) == sf::Socket::Status::Done) {
         std::string msg;
         packet >> msg;
-        std::cout << "\n[Servidor]: " << msg << std::endl << "Digite mensagem: ";
+        std::cout << "\n[Servidor]: " << msg << std::endl;
     }
 }

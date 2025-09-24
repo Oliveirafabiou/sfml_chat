@@ -47,42 +47,104 @@ void Servidor::gerenciarMensagens() {
             if (status == sf::Socket::Status::Done) {
                 std::string msg;
                 packet >> msg;
-                std::cout << "Mensagem de " << jogadores[i]->getNome() << ": " << msg << std::endl;
+                std::cout << "Mensagem crua de " << jogadores[i]->getNome() << ": \"" << msg << "\"" << std::endl;
 
-                if (msg.rfind("MSG ", 0) == 0) {
-                    broadcast(jogadores[i]->getNome() + ": " + msg.substr(4));
+                if (partida == nullptr) {
                     continue;
                 }
 
-                if (partida == nullptr) continue;
-
                 if (i != jogadorDaVezIndex) {
-                    enviarMensagemPrivada(clientes[i], "[ERRO] Espere sua vez para jogar!");
+                    enviarMensagemPrivada(clientes[i], "[ERRO] Espere sua vez!");
                     continue;
                 }
 
                 std::stringstream ss(msg);
-                std::string comando;
-                ss >> comando;
+                int comandoNum;
+                ss >> comandoNum;
+
+                if (comandoNum == 4) {
+                    std::string mao = "Sua mao atual:\n" + jogadores[i]->maoToString();
+                    enviarMensagemPrivada(clientes[i], mao);
+                    anunciarTurno(); 
+                    continue;       
+                }
 
                 std::string broadcastMsg;
+                bool maoEncerrada = false;
 
-                if (comando == "JOGAR") {
-                    int indiceCarta;
-                    ss >> indiceCarta;
-                    broadcastMsg = partida->processarJogada(i, indiceCarta, jogadorDaVezIndex);
+
+                if (partida->getJogadorEsperandoResposta() == i) {
+                    std::string respostaCmd;
+                    switch (comandoNum) {
+                    case 1: respostaCmd = "ACEITO"; break;
+                    case 2: respostaCmd = "NAO_QUERO"; break;
+                    case 3: 
+                        if (partida->getEstadoTruco() == EstadoTruco::TRUCO_PEDIDO) respostaCmd = "RETRUCO";
+                        else if (partida->getEstadoTruco() == EstadoTruco::RETRUCO_PEDIDO) respostaCmd = "VALE_QUATRO";
+                        else respostaCmd = "INVALIDO";
+                        break;
+                    default: respostaCmd = "INVALIDO"; break;
+                    }
+
+                    if (respostaCmd != "INVALIDO") {
+                        broadcastMsg = partida->processarRespostaTruco(i, respostaCmd, jogadorDaVezIndex, maoEncerrada);
+                    }
+                    else {
+                        enviarMensagemPrivada(clientes[i], "[ERRO] Opcao de resposta invalida.");
+                        anunciarTurno(); 
+                        continue;
+                    }
                 }
-                else if (comando == "TRUCO") {
-                    // Aqui você chamaria partida->processarTruco(i, jogadorDaVezIndex);
-                    broadcastMsg = "!!!! " + jogadores[i]->getNome() + " PEDIU TRUCO !!!! (Logica a ser implementada)";
-                    proximoJogador(); // Temporário
-                }
+
                 else {
-                    enviarMensagemPrivada(clientes[i], "[ERRO] Comando desconhecido.");
-                    continue;
+                    switch (comandoNum) {
+                    case 1: { 
+                        int indiceCarta;
+                        ss >> indiceCarta;
+                        if (ss.fail()) { 
+                            enviarMensagemPrivada(clientes[i], "[ERRO] Formato invalido. Use: 1 <indice da carta>");
+                            anunciarTurno();
+                            continue;
+                        }
+                        else {
+                            broadcastMsg = partida->processarJogada(i, indiceCarta, jogadorDaVezIndex);
+                        }
+                        break;
+                    }
+                    case 2: { 
+                        broadcastMsg = partida->processarPedidoTruco(i, "TRUCO", jogadorDaVezIndex);
+                        break;
+                    }
+                    case 3: { 
+                        std::string corpoMsg;
+                        std::getline(ss, corpoMsg);
+                        if (!corpoMsg.empty() && corpoMsg[0] == ' ') {
+                            corpoMsg = corpoMsg.substr(1);
+                        }
+                        broadcast(jogadores[i]->getNome() + ": " + corpoMsg);
+                        anunciarTurno();
+                        continue;
+                    }
+                    default:
+                        enviarMensagemPrivada(clientes[i], "[ERRO] Comando desconhecido.");
+                        anunciarTurno();
+                        continue;
+                    }
                 }
 
-                broadcast(broadcastMsg);
+
+                if (!broadcastMsg.empty()) {
+                    broadcast(broadcastMsg);
+                }
+
+                if (maoEncerrada) {
+                    jogadorDaVezIndex = partida->iniciarNovaMao();
+                    for (size_t j = 0; j < jogadores.size(); j++) {
+                        std::string msg_cartas = "\nNova mao! Suas cartas:\n" + jogadores[j]->maoToString();
+                        enviarMensagemPrivada(clientes[j], msg_cartas);
+                    }
+                }
+
                 anunciarTurno();
 
             }
@@ -137,11 +199,34 @@ void Servidor::enviarMensagemPrivada(sf::TcpSocket* destinatario, const std::str
 
 void Servidor::anunciarTurno() {
     if (partida == nullptr || jogadores.empty()) return;
+    if (jogadorDaVezIndex < 0 || jogadorDaVezIndex >= (int)jogadores.size()) {
+        std::cerr << "ERRO: Indice de jogador da vez invalido!" << std::endl;
+        return;
+    }
 
-    std::string msgTurno = "Agora e a vez de " + jogadores[jogadorDaVezIndex]->getNome();
+    std::string msgTurno = "\n================================\nAgora e a vez de " + jogadores[jogadorDaVezIndex]->getNome();
     broadcast(msgTurno);
 
-    std::string menu = "\nSUA VEZ!\n[1] Jogar carta\n[2] Pedir truco\n[3] Enviar mensagem\nEscolha: ";
+    std::string menu;
+    if (partida->getJogadorEsperandoResposta() == jogadorDaVezIndex) {
+        switch (partida->getEstadoTruco()) {
+        case EstadoTruco::TRUCO_PEDIDO:
+            menu = "\nVoce foi desafiado com TRUCO!\n[1] Aceitar\n[2] Nao Querer\n[3] Pedir RETRUCO\n[4] Ver minha mao\nEscolha: ";
+            break;
+        case EstadoTruco::RETRUCO_PEDIDO:
+            menu = "\nVoce foi desafiado com RETRUCO!\n[1] Aceitar\n[2] Nao Querer\n[3] Pedir VALE QUATRO\n[4] Ver minha mao\nEscolha: ";
+            break;
+        case EstadoTruco::VALE_QUATRO_PEDIDO:
+            menu = "\nVoce foi desafiado com VALE QUATRO!\n[1] Aceitar\n[2] Nao Querer\n[4] Ver minha mao\nEscolha: ";
+            break;
+        default:
+            menu = "\nSUA VEZ!\n[1] Jogar carta (Ex: 1 0)\n[2] Pedir TRUCO\n[3] Enviar mensagem (Ex: 3 Ola)\n[4] Ver minha mao\nEscolha: ";
+            break;
+        }
+    }
+    else {
+        menu = "\nSUA VEZ!\n[1] Jogar carta (Ex: 1 0)\n[2] Pedir TRUCO\n[3] Enviar mensagem (Ex: 3 Ola)\n[4] Ver minha mao\nEscolha: ";
+    }
     enviarMensagemPrivada(clientes[jogadorDaVezIndex], menu);
 }
 
@@ -150,7 +235,6 @@ void Servidor::proximoJogador() {
     std::string msgTurno = "Agora e a vez de " + jogadores[jogadorDaVezIndex]->getNome();
     broadcast(msgTurno);
 
-    // Envia o menu apenas para o jogador da vez
     std::string menu = "\nSUA VEZ!\n[1] Jogar carta\n[2] Pedir truco\n[3] Enviar mensagem\nEscolha: ";
     enviarMensagemPrivada(clientes[jogadorDaVezIndex], menu);
 }

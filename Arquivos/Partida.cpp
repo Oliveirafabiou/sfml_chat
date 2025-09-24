@@ -6,6 +6,11 @@ Partida::Partida(std::vector<Jogador*> jogadores) : jogadores(jogadores) {
     pontosEquipe1 = 0;
     pontosEquipe2 = 0;
     dealerIndex = -1;
+
+    estadoTruco = EstadoTruco::NADA;
+    pontosDaMao = 1;
+    jogadorEsperandoResposta = -1;
+    turnoAntesDoTruco = -1;
 }
 
 int Partida::iniciarNovaMao() {
@@ -26,7 +31,12 @@ int Partida::iniciarNovaMao() {
     vencedorRodada[0] = vencedorRodada[1] = vencedorRodada[2] = -1;
     cartasNaMesa.clear();
 
-    return maoIndex; 
+    estadoTruco = EstadoTruco::NADA;
+    pontosDaMao = 1;
+    jogadorEsperandoResposta = -1;
+    turnoAntesDoTruco = maoIndex;
+
+    return maoIndex;
 }
 
 std::string Partida::processarJogada(int jogadorIndex, int cartaIndex, int& proximoJogador) {
@@ -41,10 +51,11 @@ std::string Partida::processarJogada(int jogadorIndex, int cartaIndex, int& prox
 
             int vencedorMao = getVencedorDaMao();
             if (vencedorMao != -1) {
-                broadcastMsg += "\n" + concluirMao(proximoJogador);
+                broadcastMsg += "\n" + concluirMao(vencedorMao, this->pontosDaMao, proximoJogador);
             }
-            else { 
-                broadcastMsg += "\n" + jogadores[vencedorRodada[rodadaAtual - 1]]->getNome() + " venceu a rodada! Proxima rodada...";
+            else {
+                std::string vencedorRodadaNome = (vencedorRodada[rodadaAtual - 1] == -2) ? "Ninguem (Empate)" : jogadores[vencedorRodada[rodadaAtual - 1]]->getNome();
+                broadcastMsg += "\n" + vencedorRodadaNome + " venceu a rodada! Proxima rodada...";
                 rodadaAtual++;
                 cartasNaMesa.clear();
             }
@@ -56,7 +67,8 @@ std::string Partida::processarJogada(int jogadorIndex, int cartaIndex, int& prox
 
     }
     catch (const std::out_of_range& e) {
-        return "[ERRO] Jogada invalida.";
+        proximoJogador = jogadorIndex;
+        return "[ERRO] Jogada invalida. Tente novamente.";
     }
 }
 
@@ -131,27 +143,90 @@ int Partida::getVencedorDaMao() {
     return -1; // Mão ainda não terminou
 }
 
-std::string Partida::concluirMao(int& proximoJogador) {
-    int vencedor = getVencedorDaMao();
-    int pontosGanhos = 1; // Simplificado: sempre vale 1 ponto. Lógica do Truco viria aqui.
+std::string Partida::concluirMao(int vencedorIndex, int pontosGanhos, int& proximoJogador) {
+    if (vencedorIndex == 0) pontosEquipe1 += pontosGanhos;
+    else if (vencedorIndex == 1) pontosEquipe2 += pontosGanhos;
 
-    if (vencedor == 0) {
-        pontosEquipe1 += pontosGanhos;
-    }
-    else {
-        pontosEquipe2 += pontosGanhos;
-    }
-
-    std::string msg = ">> " + jogadores[vencedor]->getNome() + " venceu a mao e ganhou " + std::to_string(pontosGanhos) + " ponto(s)!";
+    std::string msg = ">> " + jogadores[vencedorIndex]->getNome() + " venceu e ganhou " + std::to_string(pontosGanhos) + " ponto(s)!";
     msg += "\n>> PLACAR: " + jogadores[0]->getNome() + " " + std::to_string(pontosEquipe1) + " x " + std::to_string(pontosEquipe2) + " " + jogadores[1]->getNome();
 
-    if (pontosEquipe1 >= 30 || pontosEquipe2 >= 30) {
-        msg += "\nFIM DE JOGO! " + jogadores[vencedor]->getNome() + " VENCEU A PARTIDA!";
+    if (pontosEquipe1 >= 21 || pontosEquipe2 >= 21) {
+        msg += "\nFIM DE JOGO! " + jogadores[vencedorIndex]->getNome() + " VENCEU A PARTIDA!";
     }
     else {
-        // Prepara para a próxima mão
-        proximoJogador = (dealerIndex + 1) % jogadores.size();
+        proximoJogador = (dealerIndex + 2) % jogadores.size();
     }
 
     return msg;
+}
+
+
+EstadoTruco Partida::getEstadoTruco() const { return estadoTruco; }
+int Partida::getJogadorEsperandoResposta() const { return jogadorEsperandoResposta; }
+
+std::string Partida::processarPedidoTruco(int quemPediu, const std::string& comando, int& proximoJogador) {
+    turnoAntesDoTruco = proximoJogador; 
+
+    if (comando == "TRUCO" && estadoTruco == EstadoTruco::NADA) {
+        estadoTruco = EstadoTruco::TRUCO_PEDIDO;
+    }
+    else if (comando == "RETRUCO" && estadoTruco == EstadoTruco::ACEITO) {
+        estadoTruco = EstadoTruco::RETRUCO_PEDIDO;
+    }
+    else if (comando == "VALE_QUATRO" && estadoTruco == EstadoTruco::ACEITO) {
+        estadoTruco = EstadoTruco::VALE_QUATRO_PEDIDO;
+    }
+    else {
+        return "[ERRO] Pedido de truco invalido neste momento.";
+    }
+
+    jogadorEsperandoResposta = (quemPediu + 1) % jogadores.size();
+    proximoJogador = jogadorEsperandoResposta;
+
+    return "!!!! " + jogadores[quemPediu]->getNome() + " pediu " + comando + " !!!!";
+}
+
+std::string Partida::processarRespostaTruco(int quemRespondeu, const std::string& comando, int& proximoJogador, bool& maoEncerrada) {
+    maoEncerrada = false;
+    if (quemRespondeu != jogadorEsperandoResposta) {
+        return "[ERRO] Nao e sua vez de responder ao truco.";
+    }
+
+    int quemPediu = (quemRespondeu + 1) % jogadores.size();
+
+    if (comando == "NAO_QUERO") {
+        maoEncerrada = true;
+        int pontosGanhos = 1; 
+        if (estadoTruco == EstadoTruco::RETRUCO_PEDIDO) pontosGanhos = 2;
+        if (estadoTruco == EstadoTruco::VALE_QUATRO_PEDIDO) pontosGanhos = 3;
+
+        return concluirMao(quemPediu, pontosGanhos, proximoJogador);
+    }
+
+    if (comando == "ACEITO") {
+        if (estadoTruco == EstadoTruco::TRUCO_PEDIDO) pontosDaMao = 2;
+        if (estadoTruco == EstadoTruco::RETRUCO_PEDIDO) pontosDaMao = 3;
+        if (estadoTruco == EstadoTruco::VALE_QUATRO_PEDIDO) pontosDaMao = 4;
+
+        estadoTruco = EstadoTruco::ACEITO;
+        jogadorEsperandoResposta = -1;
+        proximoJogador = turnoAntesDoTruco;
+        return "O pedido foi aceito! A mao agora vale " + std::to_string(pontosDaMao) + " pontos. Jogo continua...";
+    }
+
+    if (comando == "RETRUCO" && estadoTruco == EstadoTruco::TRUCO_PEDIDO) {
+        estadoTruco = EstadoTruco::RETRUCO_PEDIDO;
+        jogadorEsperandoResposta = quemPediu;
+        proximoJogador = jogadorEsperandoResposta;
+        return "!!!! " + jogadores[quemRespondeu]->getNome() + " aumentou para RETRUCO !!!!";
+    }
+
+    if (comando == "VALE_QUATRO" && estadoTruco == EstadoTruco::RETRUCO_PEDIDO) {
+        estadoTruco = EstadoTruco::VALE_QUATRO_PEDIDO;
+        jogadorEsperandoResposta = quemPediu;
+        proximoJogador = jogadorEsperandoResposta;
+        return "!!!!!! " + jogadores[quemRespondeu]->getNome() + " ESCALOU PARA VALE QUATRO !!!!!!";
+    }
+
+    return "[ERRO] Resposta de truco '" + comando + "' invalida neste momento.";
 }
