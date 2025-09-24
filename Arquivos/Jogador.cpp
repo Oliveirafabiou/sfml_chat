@@ -26,3 +26,11 @@ std::string Jogador::maoToString() const {
 
 std::string Jogador::getNome() const { return nome; }
 int Jogador::getId() const { return id; }
+
+
+const std::vector<Carta>& Jogador::getMao() const {
+    return mao;
+}
+void Jogador::limparMao() {
+    mao.clear();
+}

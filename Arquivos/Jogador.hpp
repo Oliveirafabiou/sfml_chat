@@ -16,4 +16,7 @@ public:
     std::string maoToString() const;
     std::string getNome() const;
     int getId() const;
+
+    const std::vector<Carta>& getMao() const;
+    void limparMao();
 };

@@ -39,7 +39,7 @@ void Servidor::aceitarConexoes() {
 }
 
 void Servidor::gerenciarMensagens() {
-    for (size_t i = 0; i < clientes.size(); i++) {
+    for (int i = (int)clientes.size() - 1; i >= 0; i--) {
         if (selector.isReady(*clientes[i])) {
             sf::Packet packet;
             sf::Socket::Status status = clientes[i]->receive(packet);
@@ -49,51 +49,71 @@ void Servidor::gerenciarMensagens() {
                 packet >> msg;
                 std::cout << "Mensagem de " << jogadores[i]->getNome() << ": " << msg << std::endl;
 
-                std::stringstream ss(msg);
-                std::string comando;
-                ss >> comando; // Extrai o primeiro "token" (comando)
-
-                // Mensagens de chat são permitidas a qualquer momento
-                if (comando == "MSG") {
-                    std::string corpoMsg;
-                    std::getline(ss, corpoMsg); // Pega o resto da linha
-                    broadcast(jogadores[i]->getNome() + ":" + corpoMsg);
+                if (msg.rfind("MSG ", 0) == 0) {
+                    broadcast(jogadores[i]->getNome() + ": " + msg.substr(4));
                     continue;
                 }
 
-                // Para ações de jogo, verifica se é o turno do jogador
-                if ((int)i != jogadorDaVezIndex) {
+                if (partida == nullptr) continue;
+
+                if (i != jogadorDaVezIndex) {
                     enviarMensagemPrivada(clientes[i], "[ERRO] Espere sua vez para jogar!");
                     continue;
                 }
 
-                // Processa comandos do jogador da vez
+                std::stringstream ss(msg);
+                std::string comando;
+                ss >> comando;
+
+                std::string broadcastMsg;
+
                 if (comando == "JOGAR") {
                     int indiceCarta;
                     ss >> indiceCarta;
-                    Carta c = jogadores[i]->jogarCarta(indiceCarta);
-                    broadcast(jogadores[i]->getNome() + " jogou a carta: " + c.toString());
-
-                    // Passa o token para o próximo jogador
-                    proximoJogador();
-
+                    broadcastMsg = partida->processarJogada(i, indiceCarta, jogadorDaVezIndex);
                 }
                 else if (comando == "TRUCO") {
-                    broadcast("!!!! " + jogadores[i]->getNome() + " PEDIU TRUCO !!!!");
-                    // (Lógica do truco viria aqui)
-
-                    // Por enquanto, apenas passa a vez
-                    proximoJogador();
-
+                    // Aqui você chamaria partida->processarTruco(i, jogadorDaVezIndex);
+                    broadcastMsg = "!!!! " + jogadores[i]->getNome() + " PEDIU TRUCO !!!! (Logica a ser implementada)";
+                    proximoJogador(); // Temporário
                 }
                 else {
                     enviarMensagemPrivada(clientes[i], "[ERRO] Comando desconhecido.");
+                    continue;
                 }
+
+                broadcast(broadcastMsg);
+                anunciarTurno();
 
             }
             else if (status == sf::Socket::Status::Disconnected) {
-                // (Lógica para tratar desconexão do jogador)
-                std::cout << "Jogador " << jogadores[i]->getNome() << " desconectado." << std::endl;
+
+                std::string nomeDesconectado = jogadores[i]->getNome();
+                std::cout << ">>> Jogador " << nomeDesconectado << " desconectado." << std::endl;
+
+                selector.remove(*clientes[i]);
+
+                delete clientes[i];
+                delete jogadores[i];
+
+                clientes.erase(clientes.begin() + i);
+                jogadores.erase(jogadores.begin() + i);
+
+                broadcast("O jogador " + nomeDesconectado + " saiu da partida.");
+
+                if (partida != nullptr) {
+                    if ((int)jogadores.size() < minJogadores) {
+                        broadcast("Fim de jogo. Nao ha jogadores suficientes.");
+                        delete partida;
+                        partida = nullptr;
+                    }
+                    else {
+                        if (jogadorDaVezIndex >= (int)jogadores.size()) {
+                            jogadorDaVezIndex = 0;
+                        }
+                        anunciarTurno();
+                    }
+                }
             }
         }
     }
@@ -115,6 +135,16 @@ void Servidor::enviarMensagemPrivada(sf::TcpSocket* destinatario, const std::str
     destinatario->send(p);
 }
 
+void Servidor::anunciarTurno() {
+    if (partida == nullptr || jogadores.empty()) return;
+
+    std::string msgTurno = "Agora e a vez de " + jogadores[jogadorDaVezIndex]->getNome();
+    broadcast(msgTurno);
+
+    std::string menu = "\nSUA VEZ!\n[1] Jogar carta\n[2] Pedir truco\n[3] Enviar mensagem\nEscolha: ";
+    enviarMensagemPrivada(clientes[jogadorDaVezIndex], menu);
+}
+
 void Servidor::proximoJogador() {
     jogadorDaVezIndex = (jogadorDaVezIndex + 1) % jogadores.size();
     std::string msgTurno = "Agora e a vez de " + jogadores[jogadorDaVezIndex]->getNome();
@@ -125,27 +155,21 @@ void Servidor::proximoJogador() {
     enviarMensagemPrivada(clientes[jogadorDaVezIndex], menu);
 }
 
+
 void Servidor::iniciarPartidaSePronto() {
     if ((int)jogadores.size() >= minJogadores && partida == nullptr) {
         std::cout << "Jogadores suficientes. Iniciando partida...\n";
         partida = new Partida(jogadores);
-        partida->iniciar();
 
         broadcast("Partida iniciada!");
 
-        // Enviar cartas para cada jogador
+        jogadorDaVezIndex = partida->iniciarNovaMao();
+
         for (size_t i = 0; i < jogadores.size(); i++) {
             std::string msg_cartas = "Suas cartas:\n" + jogadores[i]->maoToString();
             enviarMensagemPrivada(clientes[i], msg_cartas);
         }
 
-        // Inicia o primeiro turno
-        jogadorDaVezIndex = 0; // Garante que o jogador 1 começa
-        std::string msgTurno = "A partida comeca. E a vez de " + jogadores[jogadorDaVezIndex]->getNome();
-        broadcast(msgTurno);
-
-        // Envia o menu para o primeiro jogador
-        std::string menu = "\nSUA VEZ!\n[1] Jogar carta\n[2] Pedir truco\n[3] Enviar mensagem\nEscolha: ";
-        enviarMensagemPrivada(clientes[jogadorDaVezIndex], menu);
+        anunciarTurno();
     }
 }

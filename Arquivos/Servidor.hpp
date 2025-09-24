@@ -22,5 +22,6 @@ public:
     void broadcast(const std::string& msg, sf::TcpSocket* aExcluir = nullptr);
     void enviarMensagemPrivada(sf::TcpSocket* destinatario, const std::string& msg);
     void proximoJogador();
+    void anunciarTurno();
     void iniciarPartidaSePronto();
 };
